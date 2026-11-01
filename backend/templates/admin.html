@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Administration | Smart Village Eco-Guardian</title>
+
+    <meta
+        name="description"
+        content="Administrator area: review the village's reported issues and move them from pending to in progress to resolved."
+    >
+
+    <meta name="theme-color" content="#14532d" id="themeColor">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body class="admin-body">
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+
+    <header class="site-header">
+
+        <nav class="nav" aria-label="Administrator navigation">
+
+            <a class="brand" href="/">
+
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                    </svg>
+                </span>
+
+                <span class="brand-text">
+                    Smart Village
+                    <strong>Eco-Guardian</strong>
+                </span>
+
+            </a>
+
+
+            <div class="admin-nav">
+
+                <button
+                    class="theme-toggle"
+                    id="themeToggle"
+                    type="button"
+                    aria-label="Switch to dark theme"
+                    title="Switch theme"
+                >
+                    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                    </svg>
+
+                    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+                    </svg>
+                </button>
+
+
+                <a class="btn btn-ghost" href="/">Back to site</a>
+
+                <button class="btn btn-primary" id="adminLogout" type="button">Logout</button>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <main id="main" class="admin-main">
+
+        <section class="admin-head">
+
+            <span class="admin-kicker">Administrator only</span>
+
+            <h1>Report control</h1>
+
+            <p class="admin-lead">
+                Everything the village has reported, and what has been done about
+                it. Move a report from <strong>Pending</strong> to
+                <strong>In Progress</strong> to <strong>Resolved</strong> — the
+                public dashboard counts update from the same data.
+            </p>
+
+            <p class="admin-who" id="adminWho" hidden></p>
+
+        </section>
+
+
+        <p class="admin-denied" id="adminDenied" hidden>
+            You need an administrator account to see this page.
+            <a href="/">Back to the home page</a>
+        </p>
+
+
+        <div class="stat-grid admin-stats" id="adminStats">
+
+            <article class="stat-card stat-total">
+
+                <span class="stat-icon" aria-hidden="true">📊</span>
+
+                <p class="stat-value" data-stat="total">0</p>
+
+                <h3>Total Reports</h3>
+
+            </article>
+
+
+            <article class="stat-card stat-pending">
+
+                <span class="stat-icon" aria-hidden="true">⏳</span>
+
+                <p class="stat-value" data-stat="pending">0</p>
+
+                <h3>Pending Reports</h3>
+
+            </article>
+
+
+            <article class="stat-card stat-progress">
+
+                <span class="stat-icon" aria-hidden="true">🛠️</span>
+
+                <p class="stat-value" data-stat="inProgress">0</p>
+
+                <h3>In Progress</h3>
+
+            </article>
+
+
+            <article class="stat-card stat-resolved">
+
+                <span class="stat-icon" aria-hidden="true">✅</span>
+
+                <p class="stat-value" data-stat="resolved">0</p>
+
+                <h3>Resolved Reports</h3>
+
+            </article>
+
+        </div>
+
+
+        <section class="admin-panel">
+
+            <div class="admin-panel-head">
+
+                <h2>Reported issues</h2>
+
+                <span class="admin-count" id="adminCount">Loading…</span>
+
+            </div>
+
+
+            <div class="admin-list" id="adminList">
+
+                <p class="admin-empty">Loading reports…</p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+
+</body>
+
+</html>

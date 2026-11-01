@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Smart Village Eco-Guardian | A Cleaner, Greener Village</title>
+
+    <meta
+        name="description"
+        content="Smart Village Eco-Guardian helps villagers keep their surroundings clean and green with eco tips, community reports and simple tools."
+    >
+
+    <meta name="theme-color" content="#14532d" id="themeColor">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+
+    <!-- ============================= -->
+    <!-- Navigation Bar -->
+    <!-- ============================= -->
+
+    <header class="site-header" id="siteHeader">
+
+        <nav class="nav" aria-label="Primary navigation">
+
+            <a class="brand" href="#home">
+
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                    </svg>
+                </span>
+
+                <span class="brand-text">
+                    Smart Village
+                    <strong>Eco-Guardian</strong>
+                </span>
+
+            </a>
+
+
+            <button
+                class="nav-toggle"
+                id="navToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="navMenu"
+                aria-label="Open navigation menu"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+
+            <div class="nav-menu" id="navMenu">
+
+                <a class="nav-link is-active" href="#home">Home</a>
+                <a class="nav-link" id="navAbout" href="#about">About</a>
+                <a class="nav-link" id="navDashboard" href="#dashboard">Dashboard</a>
+                <a class="nav-link" id="navEcoTips" href="#eco-tips">Eco Tips</a>
+                <a class="nav-link" id="navReport" href="#report">Report Issue</a>
+                <a class="nav-link" href="#track">Track</a>
+                <a class="nav-link" href="#contact">Contact</a>
+
+                <a class="nav-link nav-admin" id="adminLink" href="/admin" hidden>Admin</a>
+
+                <button
+                    class="theme-toggle"
+                    id="themeToggle"
+                    type="button"
+                    aria-label="Switch to dark theme"
+                    title="Switch theme"
+                >
+                    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                    </svg>
+
+                    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+                    </svg>
+                </button>
+
+            </div>
+
+
+            <!-- Right corner: log in / sign up, then the account avatar -->
+
+            <div class="nav-profile" id="navProfile">
+
+                <button
+                    class="btn btn-primary entry-button"
+                    id="entryButton"
+                    type="button"
+                >
+                    Login / Sign up
+                </button>
+
+
+                <button
+                    class="profile-button"
+                    id="profileButton"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="profileMenu"
+                    aria-label="Open account menu"
+                    title="Account"
+                    hidden
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+
+
+                <div class="profile-menu" id="profileMenu" hidden>
+
+                    <p class="profile-label" id="profileLabel">Signed in as</p>
+
+                    <p class="profile-phone" id="profilePhone"></p>
+
+                    <p class="profile-role" id="profileRole" hidden></p>
+
+                    <button class="profile-action is-quiet" id="logoutButton" type="button">
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <main id="main">
+
+
+        <!-- ============================= -->
+        <!-- Hero Section -->
+        <!-- ============================= -->
+
+        <section id="home" class="hero">
+
+            <div class="hero-scene" aria-hidden="true">
+
+                <svg class="hero-art" viewBox="0 0 1440 780" preserveAspectRatio="xMidYMax slice">
+
+                    <defs>
+                        <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" class="sky-stop-1" />
+                            <stop offset="55%" class="sky-stop-2" />
+                            <stop offset="100%" class="sky-stop-3" />
+                        </linearGradient>
+
+                        <linearGradient id="sunGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" class="sun-stop-1" />
+                            <stop offset="100%" class="sun-stop-2" />
+                        </linearGradient>
+                    </defs>
+
+                    <rect class="sky" width="1440" height="780" fill="url(#skyGradient)" />
+
+                    <circle class="sun-halo" cx="1140" cy="170" r="155" />
+                    <circle class="sun" cx="1140" cy="170" r="70" fill="url(#sunGradient)" />
+
+                    <g class="clouds">
+                        <ellipse class="cloud" cx="250" cy="140" rx="95" ry="30" />
+                        <ellipse class="cloud" cx="320" cy="120" rx="70" ry="34" />
+                        <ellipse class="cloud" cx="640" cy="90" rx="75" ry="26" />
+                        <ellipse class="cloud" cx="700" cy="75" rx="55" ry="26" />
+                    </g>
+
+                    <g class="birds">
+                        <path class="bird" d="M180 250q16-16 32 0q16-16 32 0" />
+                        <path class="bird" d="M270 300q12-12 24 0q12-12 24 0" />
+                        <path class="bird" d="M360 235q10-10 20 0q10-10 20 0" />
+                    </g>
+
+                    <path class="hill hill-back"
+                        d="M0 470C180 410 340 393 520 440C700 487 830 415 1010 393C1190 371 1320 420 1440 442L1440 780L0 780Z" />
+
+                    <path class="hill hill-mid"
+                        d="M0 562C160 505 320 520 470 556C640 596 780 530 950 515C1130 499 1300 546 1440 572L1440 780L0 780Z" />
+
+                    <g class="trees">
+                        <g class="tree pine" transform="translate(120 678)">
+                            <path class="foliage" d="M0-132 -38-38 -18-38 -50 12 50 12 18-38 38-38Z" />
+                            <rect class="trunk" x="-7" y="6" width="14" height="46" rx="6" />
+                        </g>
+
+                        <g class="tree round" transform="translate(255 678)">
+                            <rect class="trunk" x="-8" y="-40" width="16" height="70" rx="8" />
+                            <circle class="foliage" cx="0" cy="-64" r="42" />
+                            <circle class="foliage" cx="-30" cy="-42" r="28" />
+                            <circle class="foliage" cx="30" cy="-44" r="28" />
+                        </g>
+
+                        <g class="tree pine" transform="translate(415 678) scale(0.82)">
+                            <path class="foliage" d="M0-132 -38-38 -18-38 -50 12 50 12 18-38 38-38Z" />
+                            <rect class="trunk" x="-7" y="6" width="14" height="46" rx="6" />
+                        </g>
+
+                        <g class="tree round" transform="translate(560 678) scale(0.9)">
+                            <rect class="trunk" x="-8" y="-40" width="16" height="70" rx="8" />
+                            <circle class="foliage" cx="0" cy="-64" r="42" />
+                            <circle class="foliage" cx="-30" cy="-42" r="28" />
+                            <circle class="foliage" cx="30" cy="-44" r="28" />
+                        </g>
+
+                        <g class="tree pine" transform="translate(720 678) scale(1.05)">
+                            <path class="foliage" d="M0-132 -38-38 -18-38 -50 12 50 12 18-38 38-38Z" />
+                            <rect class="trunk" x="-7" y="6" width="14" height="46" rx="6" />
+                        </g>
+
+                        <g class="tree round" transform="translate(880 678) scale(0.85)">
+                            <rect class="trunk" x="-8" y="-40" width="16" height="70" rx="8" />
+                            <circle class="foliage" cx="0" cy="-64" r="42" />
+                            <circle class="foliage" cx="-30" cy="-42" r="28" />
+                            <circle class="foliage" cx="30" cy="-44" r="28" />
+                        </g>
+
+                        <g class="tree pine" transform="translate(1040 678) scale(0.9)">
+                            <path class="foliage" d="M0-132 -38-38 -18-38 -50 12 50 12 18-38 38-38Z" />
+                            <rect class="trunk" x="-7" y="6" width="14" height="46" rx="6" />
+                        </g>
+
+                        <g class="tree round" transform="translate(1210 678) scale(1.05)">
+                            <rect class="trunk" x="-8" y="-40" width="16" height="70" rx="8" />
+                            <circle class="foliage" cx="0" cy="-64" r="42" />
+                            <circle class="foliage" cx="-30" cy="-42" r="28" />
+                            <circle class="foliage" cx="30" cy="-44" r="28" />
+                        </g>
+
+                        <g class="tree pine" transform="translate(1345 678) scale(0.75)">
+                            <path class="foliage" d="M0-132 -38-38 -18-38 -50 12 50 12 18-38 38-38Z" />
+                            <rect class="trunk" x="-7" y="6" width="14" height="46" rx="6" />
+                        </g>
+                    </g>
+
+                    <path class="hill hill-front"
+                        d="M0 655C200 610 380 640 560 666C760 694 940 640 1130 634C1260 630 1360 654 1440 674L1440 780L0 780Z" />
+
+                </svg>
+
+                <span class="leaf leaf-1"></span>
+                <span class="leaf leaf-2"></span>
+                <span class="leaf leaf-3"></span>
+                <span class="leaf leaf-4"></span>
+                <span class="leaf leaf-5"></span>
+
+            </div>
+
+
+            <div class="hero-inner">
+
+                <p class="eyebrow">🌱 Smart Village Initiative</p>
+
+                <h1>
+                    Welcome to a
+                    <span class="accent">greener</span>,
+                    cleaner village
+                </h1>
+
+                <p class="hero-lead">
+                    Together we keep our streets clean, our water pure and our trees
+                    standing. Discover simple eco habits, share what you see, and help
+                    your village grow healthier every single day.
+                </p>
+
+                <div class="hero-actions">
+
+                    <button class="btn btn-primary" id="exploreButton" type="button">
+                        Explore More
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </button>
+
+                    <a class="btn btn-ghost" id="heroReport" href="#report">Report an Issue</a>
+
+                </div>
+
+            </div>
+
+
+            <a class="scroll-cue" href="#about" aria-label="Scroll down to About section">
+                <span></span>
+            </a>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- About Section -->
+        <!-- ============================= -->
+
+        <section id="about" class="section section-alt">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">About</p>
+
+                <h2>A community looking after its own backyard</h2>
+
+                <p>
+                    Smart Village Eco-Guardian is a web-based project that encourages
+                    villagers to protect the environment and maintain a clean and
+                    healthy village. Anyone can learn a tip, report a problem and watch
+                    the neighbourhood improve.
+                </p>
+
+            </div>
+
+
+            <div class="feature-grid">
+
+                <article class="feature-card reveal">
+
+                    <span class="feature-icon" aria-hidden="true">📣</span>
+
+                    <h3>Report in seconds</h3>
+
+                    <p>
+                        Spotted garbage, dirty roads or a water problem? Send a report
+                        and the village can act on it quickly.
+                    </p>
+
+                </article>
+
+
+                <article class="feature-card reveal">
+
+                    <span class="feature-icon" aria-hidden="true">🌍</span>
+
+                    <h3>Everyday eco tips</h3>
+
+                    <p>
+                        Small daily habits — sorting waste, saving water, planting trees
+                        — add up to a big difference for everyone.
+                    </p>
+
+                </article>
+
+
+                <article class="feature-card reveal">
+
+                    <span class="feature-icon" aria-hidden="true">🤝</span>
+
+                    <h3>Powered by neighbours</h3>
+
+                    <p>
+                        The platform works best when the whole village takes part, one
+                        street and one household at a time.
+                    </p>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- Dashboard Section -->
+        <!-- ============================= -->
+
+        <section id="dashboard" class="section">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">Dashboard</p>
+
+                <h2>Environmental health at a glance</h2>
+
+                <p>
+                    Live counts from the community report queue — every number
+                    comes straight from the village's reports.
+                </p>
+
+            </div>
+
+
+            <div class="stat-grid">
+
+                <article class="stat-card stat-total reveal">
+
+                    <span class="stat-icon" aria-hidden="true">📊</span>
+
+                    <p class="stat-value" data-stat="total">0</p>
+
+                    <h3>Total Reports</h3>
+
+                    <p class="stat-desc">
+                        Every issue reported by villagers so far.
+                    </p>
+
+                </article>
+
+
+                <article class="stat-card stat-pending reveal">
+
+                    <span class="stat-icon" aria-hidden="true">⏳</span>
+
+                    <p class="stat-value" data-stat="pending">0</p>
+
+                    <h3>Pending Reports</h3>
+
+                    <p class="stat-desc">
+                        Issues still waiting for review and action.
+                    </p>
+
+                </article>
+
+
+                <article class="stat-card stat-progress reveal">
+
+                    <span class="stat-icon" aria-hidden="true">🛠️</span>
+
+                    <p class="stat-value" data-stat="inProgress">0</p>
+
+                    <h3>In Progress</h3>
+
+                    <p class="stat-desc">
+                        Reports the team is actively working on.
+                    </p>
+
+                </article>
+
+
+                <article class="stat-card stat-resolved reveal">
+
+                    <span class="stat-icon" aria-hidden="true">✅</span>
+
+                    <p class="stat-value" data-stat="resolved">0</p>
+
+                    <h3>Resolved Reports</h3>
+
+                    <p class="stat-desc">
+                        Problems the community has already taken care of.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <div class="category-block reveal">
+
+                <h3 class="category-title">Reports by category</h3>
+
+
+                <div class="category-grid">
+
+                    <div class="category-card" data-category="waste">
+
+                        <span class="category-icon" aria-hidden="true">🗑️</span>
+
+                        <span class="category-name">Waste</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="waste"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="waste"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="water">
+
+                        <span class="category-icon" aria-hidden="true">💧</span>
+
+                        <span class="category-name">Water Pollution</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="water"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="water"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="road">
+
+                        <span class="category-icon" aria-hidden="true">🛣️</span>
+
+                        <span class="category-name">Road Cleanliness</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="road"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="road"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="air">
+
+                        <span class="category-icon" aria-hidden="true">🌫️</span>
+
+                        <span class="category-name">Air Pollution</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="air"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="air"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="noise">
+
+                        <span class="category-icon" aria-hidden="true">🔇</span>
+
+                        <span class="category-name">Noise Pollution</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="noise"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="noise"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="green">
+
+                        <span class="category-icon" aria-hidden="true">🌳</span>
+
+                        <span class="category-name">Green Cover</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="green"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="green"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+
+                    <div class="category-card" data-category="other">
+
+                        <span class="category-icon" aria-hidden="true">📌</span>
+
+                        <span class="category-name">Other</span>
+
+                        <span
+                            class="category-count"
+                            data-category-count="other"
+                        >0</span>
+
+                        <span class="category-bar">
+                            <span
+                                class="category-fill"
+                                data-category-bar="other"
+                                style="width: 0%"
+                            ></span>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- Eco Tips Section -->
+        <!-- ============================= -->
+
+        <section id="eco-tips" class="section">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">Eco Tips</p>
+
+                <h2>Little habits, big impact</h2>
+
+                <p>
+                    Pick a tip today and keep it going. Hover over a card to explore it.
+                </p>
+
+            </div>
+
+
+            <div class="tips">
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">🗑️</span>
+
+                    <h3>Waste Management</h3>
+
+                    <p>
+                        Separate wet and dry waste and always use proper waste bins.
+                    </p>
+
+                    <span class="tip-tag">Cleanliness</span>
+
+                </article>
+
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">💧</span>
+
+                    <h3>Water Conservation</h3>
+
+                    <p>
+                        Avoid wasting water and use water carefully in our daily
+                        activities.
+                    </p>
+
+                    <span class="tip-tag">Resources</span>
+
+                </article>
+
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">🌳</span>
+
+                    <h3>Plant More Trees</h3>
+
+                    <p>
+                        Plant and protect trees to make our village greener and
+                        healthier.
+                    </p>
+
+                    <span class="tip-tag">Greenery</span>
+
+                </article>
+
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">♻️</span>
+
+                    <h3>Reduce &amp; Reuse</h3>
+
+                    <p>
+                        Refuse single-use plastic, reuse jars and bags, and repair
+                        before you replace.
+                    </p>
+
+                    <span class="tip-tag">Lifestyle</span>
+
+                </article>
+
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">💡</span>
+
+                    <h3>Save Energy</h3>
+
+                    <p>
+                        Switch off lights and fans when nobody is using them and prefer
+                        daylight while the sun is up.
+                    </p>
+
+                    <span class="tip-tag">Energy</span>
+
+                </article>
+
+
+                <article class="tip reveal">
+
+                    <span class="tip-icon" aria-hidden="true">🧹</span>
+
+                    <h3>Keep It Clean</h3>
+
+                    <p>
+                        Give your street a quick weekly tidy-up and keep drains and
+                        public spaces free of litter.
+                    </p>
+
+                    <span class="tip-tag">Community</span>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- Report Issue Section -->
+        <!-- ============================= -->
+
+        <section id="report" class="section section-alt">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">Report Issue</p>
+
+                <h2>Report an environmental issue</h2>
+
+                <p>
+                    Found an environmental problem in your village? Tell us what it
+                    is and where to find it.
+                </p>
+
+            </div>
+
+
+            <form id="reportForm" class="report-card reveal" novalidate>
+
+                <div class="field">
+
+                    <label for="name">Your Name</label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your name"
+                        autocomplete="name"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="issue">Issue Type</label>
+
+                    <select id="issue" name="issue">
+
+                        <option value="">
+                            Select a category
+                        </option>
+
+                        <option value="waste">
+                            Waste
+                        </option>
+
+                        <option value="water">
+                            Water Pollution
+                        </option>
+
+                        <option value="road">
+                            Road Cleanliness
+                        </option>
+
+                        <option value="air">
+                            Air Pollution
+                        </option>
+
+                        <option value="noise">
+                            Noise Pollution
+                        </option>
+
+                        <option value="green">
+                            Green Cover
+                        </option>
+
+                        <option value="other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="address">Address / Location</label>
+
+                    <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        placeholder="e.g. 12 Gandhi Street, near the pond"
+                        autocomplete="street-address"
+                    >
+
+                    <button
+                        class="location-btn"
+                        id="locationButton"
+                        type="button"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        Use my live location
+                    </button>
+
+                    <p
+                        id="locationStatus"
+                        class="location-status"
+                        role="status"
+                        aria-live="polite"
+                    ></p>
+
+                    <p class="location-credit">
+                        Address data ©
+                        <a
+                            href="https://www.openstreetmap.org/copyright"
+                            target="_blank"
+                            rel="noopener"
+                        >OpenStreetMap</a>
+                        contributors
+                    </p>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="description">Description</label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Describe the problem"
+                        maxlength="200"
+                    ></textarea>
+
+                    <p id="characterCount" class="hint">
+                        Characters: 0 / 200
+                    </p>
+
+                </div>
+
+
+                <button class="btn btn-primary btn-block" type="submit">
+                    Submit Report
+                </button>
+
+
+                <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+
+            </form>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- Report Tracking Section -->
+        <!-- ============================= -->
+
+        <section id="track" class="section">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">Report Tracking</p>
+
+                <h2>Track your report</h2>
+
+                <p>
+                    Enter the name you used when reporting — or your report ID —
+                    to see whether it is pending, in progress or resolved.
+                </p>
+
+            </div>
+
+
+            <form id="trackForm" class="track-card reveal" novalidate>
+
+                <div class="track-row">
+
+                    <label class="sr-only" for="trackQuery">
+                        Your name or report ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="trackQuery"
+                        placeholder="e.g. Priya or #3"
+                        autocomplete="name"
+                    >
+
+                    <button class="btn btn-primary" type="submit">
+                        Track
+                    </button>
+
+                </div>
+
+
+                <p
+                    id="trackMessage"
+                    class="track-message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+
+                <div id="trackResults" class="track-results"></div>
+
+            </form>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- Contact Section -->
+        <!-- ============================= -->
+
+        <section id="contact" class="section">
+
+            <div class="section-head reveal">
+
+                <p class="eyebrow">Contact</p>
+
+                <h2>Contact us</h2>
+
+                <p>
+                    Have a question or suggestion about our project?
+                    We would be happy to hear from you.
+                </p>
+
+            </div>
+
+
+            <div class="contact-card reveal">
+
+                <span class="feature-icon" aria-hidden="true">✉️</span>
+
+                <p>Email us any time</p>
+
+                <a href="mailto:ecoguardian@example.com">ecoguardian@example.com</a>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ============================= -->
+    <!-- Back To Top -->
+    <!-- ============================= -->
+
+    <button id="topButton" class="top-button" type="button" aria-label="Back to top">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 19V5M6 11l6-6 6 6" />
+        </svg>
+
+    </button>
+
+
+    <!-- ============================= -->
+    <!-- Footer -->
+    <!-- ============================= -->
+
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <p class="footer-brand">Smart Village Eco-Guardian</p>
+
+            <p>Working together for a cleaner and greener village.</p>
+
+            <p class="footer-copy">© 2026 Smart Village Eco-Guardian</p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ============================= -->
+    <!-- Login Modal (mobile number + OTP) -->
+    <!-- ============================= -->
+
+    <div class="modal-overlay" id="loginModal" hidden>
+
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+
+            <button class="modal-close" id="loginClose" type="button" aria-label="Close login window">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+            </button>
+
+
+            <!-- Step 1: username + password -->
+
+            <form id="loginStep" novalidate>
+
+                <span class="modal-badge" aria-hidden="true">🌿</span>
+
+                <h2 id="loginTitle">Login</h2>
+
+                <p class="modal-lead">
+                    Welcome back! Log in with your username and password.
+                </p>
+
+                <label for="loginUser">Username</label>
+
+                <input
+                    class="form-input"
+                    type="text"
+                    id="loginUser"
+                    autocomplete="username"
+                    maxlength="20"
+                    placeholder="Your username"
+                >
+
+                <label for="loginPass">Password</label>
+
+                <input
+                    class="form-input"
+                    type="password"
+                    id="loginPass"
+                    autocomplete="current-password"
+                    maxlength="64"
+                    placeholder="Your password"
+                >
+
+                <button class="btn btn-primary btn-block" id="loginSubmit" type="submit">
+                    Login
+                </button>
+
+                <p class="step-switch">
+                    New here?
+                    <button class="link-button" id="goSignup" type="button">
+                        Create an account
+                    </button>
+                </p>
+
+                <p class="step-switch">
+                    <button class="link-button" id="goPhone" type="button">
+                        Login with mobile OTP instead
+                    </button>
+                </p>
+
+            </form>
+
+
+            <!-- Step 2: create an account -->
+
+            <form id="signupStep" novalidate hidden>
+
+                <span class="modal-badge" aria-hidden="true">✨</span>
+
+                <h2>Sign up</h2>
+
+                <p class="modal-lead">
+                    Pick a username and password. Next time you can log in
+                    straight away — no OTP needed.
+                </p>
+
+                <fieldset class="role-picker">
+
+                    <legend>Signing up as</legend>
+
+                    <div class="role-options">
+
+                        <label class="role-option">
+                            <input type="radio" name="signupRole" value="user" checked>
+                            <span class="role-card">
+                                <span class="role-icon" aria-hidden="true">👤</span>
+                                <strong>User</strong>
+                                <small>Report issues &amp; track their status</small>
+                            </span>
+                        </label>
+
+                        <label class="role-option">
+                            <input type="radio" name="signupRole" value="admin">
+                            <span class="role-card">
+                                <span class="role-icon" aria-hidden="true">🛡️</span>
+                                <strong>Administrator</strong>
+                                <small>Manage reports &amp; the dashboard</small>
+                            </span>
+                        </label>
+
+                    </div>
+
+                </fieldset>
+
+                <label for="signupUser">Username</label>
+
+                <input
+                    class="form-input"
+                    type="text"
+                    id="signupUser"
+                    autocomplete="username"
+                    maxlength="20"
+                    placeholder="3-20 letters, numbers or underscores"
+                >
+
+                <label for="signupPass">Password</label>
+
+                <input
+                    class="form-input"
+                    type="password"
+                    id="signupPass"
+                    autocomplete="new-password"
+                    maxlength="64"
+                    placeholder="At least 6 characters"
+                >
+
+                <label for="signupConfirm">Confirm password</label>
+
+                <input
+                    class="form-input"
+                    type="password"
+                    id="signupConfirm"
+                    autocomplete="new-password"
+                    maxlength="64"
+                    placeholder="Type the password again"
+                >
+
+                <button class="btn btn-primary btn-block" id="signupSubmit" type="submit">
+                    Create account
+                </button>
+
+                <p class="step-switch">
+                    Already have an account?
+                    <button class="link-button" id="goLogin" type="button">Login</button>
+                </p>
+
+            </form>
+
+
+            <!-- Step 3: mobile number (optional OTP login) -->
+
+            <form id="phoneStep" novalidate hidden>
+
+                <span class="modal-badge" aria-hidden="true">📱</span>
+
+                <h2>Login with your mobile</h2>
+
+                <p class="modal-lead">
+                    Enter your 10-digit mobile number and we will send a
+                    one-time password to verify it.
+                </p>
+
+                <label for="phoneInput">Mobile number</label>
+
+                <div class="phone-field">
+                    <span class="phone-prefix" aria-hidden="true">+91</span>
+
+                    <input
+                        type="tel"
+                        id="phoneInput"
+                        inputmode="numeric"
+                        autocomplete="tel-national"
+                        maxlength="10"
+                        placeholder="98765 43210"
+                    >
+                </div>
+
+                <button class="btn btn-primary btn-block" id="sendOtpButton" type="submit">
+                    Send OTP
+                </button>
+
+                <p class="step-switch">
+                    <button class="link-button" id="goLoginFromPhone" type="button">
+                        Use username &amp; password instead
+                    </button>
+                </p>
+
+            </form>
+
+
+            <!-- Step 2: one-time password -->
+
+            <form id="otpStep" novalidate hidden>
+
+                <span class="modal-badge" aria-hidden="true">🔑</span>
+
+                <h2>Enter the OTP</h2>
+
+                <p class="modal-lead">
+                    Sent to <strong id="otpPhone"></strong>
+                    <button class="link-button" id="changeNumber" type="button">
+                        Change number
+                    </button>
+                </p>
+
+                <label for="otpInput">6-digit code</label>
+
+                <input
+                    class="otp-input"
+                    id="otpInput"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    placeholder="000000"
+                >
+
+                <p class="demo-otp" id="demoOtp" hidden></p>
+
+                <button class="btn btn-primary btn-block" id="verifyButton" type="submit">
+                    Verify &amp; Login
+                </button>
+
+                <p class="resend-row">
+
+                    <button class="link-button" id="resendButton" type="button" disabled>
+                        Resend OTP
+                    </button>
+
+                    <span class="resend-timer" id="resendTimer"></span>
+
+                </p>
+
+            </form>
+
+
+            <p class="modal-message" id="loginMessage" role="status" aria-live="polite"></p>
+
+        </div>
+
+    </div>
+
+
+    <!-- JavaScript File -->
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>

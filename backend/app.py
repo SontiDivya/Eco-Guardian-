@@ -1,0 +1,754 @@
+from flask import Flask, render_template, request, jsonify, session, redirect
+import hashlib
+import os
+import re
+import secrets
+import sqlite3
+import time
+
+app = Flask(__name__)
+
+
+# Signing key for the login session cookie. It is kept between restarts so
+# people stay signed in; set FLASK_SECRET_KEY in the environment to override.
+
+SECRET_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    ".secret_key",
+)
+
+
+def load_secret_key():
+    key = os.environ.get("FLASK_SECRET_KEY", "").strip()
+
+    if key:
+        return key
+
+    if os.path.exists(SECRET_FILE):
+        with open(SECRET_FILE) as file:
+            saved = file.read().strip()
+
+        if saved:
+            return saved
+
+    new_key = secrets.token_hex(32)
+
+    with open(SECRET_FILE, "w") as file:
+        file.write(new_key)
+
+    return new_key
+
+
+app.secret_key = load_secret_key()
+
+
+# The three states a report can be in
+
+REPORT_STATUSES = ("Pending", "In Progress", "Resolved")
+
+
+# Add missing columns to an existing database (safe to run every start)
+
+def ensure_schema():
+    connection = sqlite3.connect("eco_guardian.db")
+
+    columns = [
+        row[1]
+        for row in connection.execute("PRAGMA table_info(reports)")
+    ]
+
+    if "address" not in columns:
+        connection.execute(
+            "ALTER TABLE reports ADD COLUMN address TEXT NOT NULL DEFAULT ''"
+        )
+        connection.commit()
+
+    # One pending login code per mobile number, replaced on every request
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS otps (
+            phone TEXT PRIMARY KEY,
+            code TEXT NOT NULL,
+            expires_at INTEGER NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            requested_at INTEGER NOT NULL
+        )
+        """
+    )
+
+    # Registered members: username + password
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (
+                datetime('now', 'localtime')
+            )
+        )
+        """
+    )
+
+    # Accounts created before roles existed are ordinary users
+
+    user_columns = [
+        row[1]
+        for row in connection.execute("PRAGMA table_info(users)")
+    ]
+
+    if "role" not in user_columns:
+        connection.execute(
+            "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'"
+        )
+
+    connection.commit()
+
+    connection.close()
+
+
+ensure_schema()
+
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+def current_role():
+    """Role of the signed-in account, or None when nobody is signed in."""
+
+    username = session.get("username")
+
+    if not username:
+        return None
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    row = connection.execute(
+        "SELECT role FROM users WHERE LOWER(username) = LOWER(?)",
+        (username,),
+    ).fetchone()
+
+    connection.close()
+
+    if row is None:
+        return None
+
+    return row[0] or "user"
+
+
+def admin_only():
+    """Shared guard for every administrator endpoint."""
+
+    if current_role() != "admin":
+        return jsonify({"error": "Administrator access only."}), 403
+
+    return None
+
+
+def report_counts(connection):
+    """Total / pending / in-progress / resolved straight from the table."""
+
+    row = connection.execute(
+        """
+        SELECT COUNT(*),
+               SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END)
+        FROM reports
+        """
+    ).fetchone()
+
+    total, pending, in_progress, resolved = row
+
+    return {
+        "total": total or 0,
+        "pending": pending or 0,
+        "inProgress": in_progress or 0,
+        "resolved": resolved or 0,
+    }
+
+
+@app.route("/stats")
+def stats():
+    connection = sqlite3.connect("eco_guardian.db")
+
+    counts = report_counts(connection)
+
+    # Reports organised by issue category. The CASE folds the older
+    # "garbage" issue value into the current "waste" category.
+
+    category_rows = connection.execute(
+        """
+        SELECT CASE WHEN issue = 'garbage' THEN 'waste' ELSE issue END,
+               COUNT(*)
+        FROM reports
+        GROUP BY 1
+        """
+    ).fetchall()
+
+    connection.close()
+
+    category_keys = [
+        "waste", "water", "road", "air", "noise", "green", "other"
+    ]
+
+    categories = {key: 0 for key in category_keys}
+
+    for issue, count in category_rows:
+
+        key = issue if issue in categories else "other"
+
+        categories[key] += count
+
+    return jsonify({
+        "total": counts["total"],
+        "pending": counts["pending"],
+        "inProgress": counts["inProgress"],
+        "resolved": counts["resolved"],
+        "categories": categories,
+    })
+
+
+@app.route("/track")
+def track():
+    query = (request.args.get("q") or "").strip()
+
+    if not query:
+        return jsonify({"reports": []})
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    # A numeric query (with or without a leading #) is a report ID,
+    # anything else is matched against the reporter's name.
+
+    if query.lstrip("#").isdigit():
+        rows = connection.execute(
+            """
+            SELECT id, issue, description, address, status, created_at
+            FROM reports
+            WHERE id = ?
+            """,
+            (int(query.lstrip("#")),),
+        ).fetchall()
+    else:
+        rows = connection.execute(
+            """
+            SELECT id, issue, description, address, status, created_at
+            FROM reports
+            WHERE LOWER(name) = LOWER(?)
+            ORDER BY created_at DESC, id DESC
+            """,
+            (query,),
+        ).fetchall()
+
+    connection.close()
+
+    reports = [
+        {
+            "id": row[0],
+            "issue": row[1],
+            "description": row[2],
+            "address": row[3],
+            "status": row[4],
+            "created_at": row[5],
+        }
+        for row in rows
+    ]
+
+    return jsonify({"reports": reports})
+
+@app.route("/report", methods=["POST"])
+def report():
+    data = request.get_json()
+
+    name = data.get("name")
+    issue = data.get("issue")
+    address = data.get("address")
+    description = data.get("description")
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    cursor = connection.execute(
+        "INSERT INTO reports (name, issue, address, description) VALUES (?, ?, ?, ?)",
+        (name, issue, address, description)
+    )
+
+    connection.commit()
+
+    report_id = cursor.lastrowid
+
+    connection.close()
+
+    print("Name:", name)
+    print("Issue:", issue)
+    print("Description:", description)
+
+    return jsonify({
+        "message": "Report saved successfully!",
+        "id": report_id,
+    })
+
+
+# ==========================================
+# Login with mobile number + OTP
+# ==========================================
+
+OTP_LENGTH = 6
+
+OTP_TTL = 300             # a code stays valid for 5 minutes
+OTP_RESEND_GAP = 30       # seconds between two requests for the same number
+OTP_MAX_ATTEMPTS = 5      # wrong guesses before the code is thrown away
+
+
+def normalize_phone(value):
+    """Return a 10-digit mobile number, or None if it does not look valid."""
+
+    digits = "".join(ch for ch in str(value or "") if ch.isdigit())
+
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+
+    if len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+
+    if len(digits) == 10 and digits[0] in "6789":
+        return digits
+
+    return None
+
+
+def deliver_otp(phone, code):
+    """Send the one-time code to a mobile number.
+
+    No SMS provider is connected yet, so the code is printed to the server
+    console and handed back to the page in demo mode. To send real texts,
+    call your provider's API here (Knock/Twilio, MSG91, ...) with an API key
+    from the environment and return True once the message is accepted.
+    """
+
+    print("[OTP]", phone, "->", code)
+
+    return False
+
+
+# ==========================================
+# Accounts: username + password
+# ==========================================
+
+PASSWORD_ITERATIONS = 100000
+
+USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9_]{3,20}$")
+
+
+def hash_password(password):
+    """Store a password as pbkdf2_sha256$iterations$salt$hash."""
+
+    salt = secrets.token_hex(16)
+
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        PASSWORD_ITERATIONS,
+    )
+
+    return "pbkdf2_sha256${}${}${}".format(
+        PASSWORD_ITERATIONS,
+        salt,
+        digest.hex(),
+    )
+
+
+def check_password(password, stored):
+    """Compare a password with the stored hash in constant time."""
+
+    try:
+        algorithm, iterations, salt, digest = str(stored).split("$")
+
+        candidate = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            salt.encode("utf-8"),
+            int(iterations),
+        ).hex()
+
+    except (ValueError, TypeError):
+        return False
+
+    if algorithm != "pbkdf2_sha256":
+        return False
+
+    return secrets.compare_digest(candidate, digest)
+
+
+def sign_in(username=None, phone=None):
+    """Start a fresh session for the signed-in member."""
+
+    session.clear()
+
+    session.permanent = True
+
+    if username:
+        session["username"] = username
+
+    if phone:
+        session["phone"] = phone
+
+
+@app.route("/auth/signup", methods=["POST"])
+def signup():
+    data = request.get_json(silent=True) or {}
+
+    username = str(data.get("username") or "").strip()
+    password = str(data.get("password") or "")
+    confirm = str(data.get("confirm") or "")
+    role = str(data.get("role") or "user").strip().lower()
+
+    if role not in ("user", "admin"):
+        return jsonify({"error": "Choose whether you are a user or an administrator."}), 400
+
+    if not USERNAME_PATTERN.match(username):
+        return jsonify({
+            "error": "Username must be 3-20 letters, numbers or underscores."
+        }), 400
+
+    if len(password) < 6:
+        return jsonify({
+            "error": "Password must be at least 6 characters."
+        }), 400
+
+    if password != confirm:
+        return jsonify({"error": "The passwords do not match."}), 400
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    taken = connection.execute(
+        "SELECT 1 FROM users WHERE LOWER(username) = LOWER(?)",
+        (username,),
+    ).fetchone()
+
+    if taken:
+        connection.close()
+
+        return jsonify({
+            "error": "That username is already taken. Try logging in."
+        }), 409
+
+    connection.execute(
+        "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+        (username, hash_password(password), role),
+    )
+    connection.commit()
+    connection.close()
+
+    sign_in(username=username)
+
+    return jsonify({"ok": True, "username": username, "role": role})
+
+
+@app.route("/auth/login", methods=["POST"])
+def login():
+    data = request.get_json(silent=True) or {}
+
+    username = str(data.get("username") or "").strip()
+    password = str(data.get("password") or "")
+
+    if not username or not password:
+        return jsonify({"error": "Enter your username and password."}), 400
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    row = connection.execute(
+        "SELECT username, password, role FROM users WHERE LOWER(username) = LOWER(?)",
+        (username,),
+    ).fetchone()
+
+    connection.close()
+
+    if row is None or not check_password(password, row[1]):
+        return jsonify({
+            "error": "Wrong username or password. Please try again."
+        }), 400
+
+    sign_in(username=row[0])
+
+    return jsonify({
+        "ok": True,
+        "username": row[0],
+        "role": row[2] or "user",
+    })
+
+
+@app.route("/auth/request-otp", methods=["POST"])
+def request_otp():
+    data = request.get_json(silent=True) or {}
+
+    phone = normalize_phone(data.get("phone"))
+
+    if phone is None:
+        return jsonify({"error": "Enter a valid 10-digit mobile number."}), 400
+
+    now = int(time.time())
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    row = connection.execute(
+        "SELECT requested_at FROM otps WHERE phone = ?",
+        (phone,),
+    ).fetchone()
+
+    if row and now - row[0] < OTP_RESEND_GAP:
+        connection.close()
+
+        wait = OTP_RESEND_GAP - (now - row[0])
+
+        return jsonify({
+            "error": "Please wait " + str(wait) +
+                     " seconds before requesting another OTP."
+        }), 429
+
+    code = "{:0{}d}".format(secrets.randbelow(10 ** OTP_LENGTH), OTP_LENGTH)
+
+    connection.execute(
+        """
+        INSERT OR REPLACE INTO otps
+            (phone, code, expires_at, attempts, requested_at)
+        VALUES (?, ?, ?, 0, ?)
+        """,
+        (phone, code, now + OTP_TTL, now),
+    )
+    connection.commit()
+    connection.close()
+
+    delivered = deliver_otp(phone, code)
+
+    payload = {
+        "ok": True,
+        "phone": phone,
+        "expiresIn": OTP_TTL,
+        "resendAfter": OTP_RESEND_GAP,
+    }
+
+    if not delivered:
+        # Demo mode: the page can show the code until an SMS provider is added
+        payload["demoOtp"] = code
+
+    return jsonify(payload)
+
+
+@app.route("/auth/verify-otp", methods=["POST"])
+def verify_otp():
+    data = request.get_json(silent=True) or {}
+
+    phone = normalize_phone(data.get("phone"))
+    code = str(data.get("otp") or "").strip()
+
+    if phone is None:
+        return jsonify({"error": "Enter a valid 10-digit mobile number."}), 400
+
+    if len(code) != OTP_LENGTH or not code.isdigit():
+        return jsonify({"error": "Enter the 6-digit OTP."}), 400
+
+    now = int(time.time())
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    row = connection.execute(
+        "SELECT code, expires_at, attempts FROM otps WHERE phone = ?",
+        (phone,),
+    ).fetchone()
+
+    if row is None:
+        connection.close()
+
+        return jsonify({
+            "error": "No OTP found for this number. Request a new one."
+        }), 400
+
+    stored_code, expires_at, attempts = row
+
+    if now > expires_at:
+        connection.execute("DELETE FROM otps WHERE phone = ?", (phone,))
+        connection.commit()
+        connection.close()
+
+        return jsonify({"error": "That OTP has expired. Request a new one."}), 400
+
+    if attempts >= OTP_MAX_ATTEMPTS:
+        connection.execute("DELETE FROM otps WHERE phone = ?", (phone,))
+        connection.commit()
+        connection.close()
+
+        return jsonify({
+            "error": "Too many wrong attempts. Request a new OTP."
+        }), 400
+
+    if not secrets.compare_digest(stored_code, code):
+        connection.execute(
+            "UPDATE otps SET attempts = attempts + 1 WHERE phone = ?",
+            (phone,),
+        )
+        connection.commit()
+        connection.close()
+
+        left = OTP_MAX_ATTEMPTS - attempts - 1
+
+        return jsonify({
+            "error": "Incorrect OTP. " + str(left) + " attempt(s) left."
+        }), 400
+
+    # Correct: the code is single-use, so drop it and sign the number in
+
+    connection.execute("DELETE FROM otps WHERE phone = ?", (phone,))
+    connection.commit()
+    connection.close()
+
+    sign_in(phone=phone)
+
+    return jsonify({"ok": True, "phone": phone})
+
+
+@app.route("/auth/logout", methods=["POST"])
+def logout():
+    session.clear()
+
+    return jsonify({"ok": True})
+
+
+@app.route("/auth/me")
+def me():
+    username = session.get("username")
+    role = None
+
+    if username:
+        connection = sqlite3.connect("eco_guardian.db")
+
+        row = connection.execute(
+            "SELECT role FROM users WHERE LOWER(username) = LOWER(?)",
+            (username,),
+        ).fetchone()
+
+        connection.close()
+
+        role = (row[0] if row else "user") or "user"
+
+    response = jsonify({
+        "username": username,
+        "phone": session.get("phone"),
+        "role": role,
+    })
+    response.headers["Cache-Control"] = "no-store"
+
+    return response
+
+
+# ==========================================
+# Administrator area (hidden from ordinary users)
+# ==========================================
+
+@app.route("/admin")
+def admin_page():
+    role = current_role()
+
+    if role != "admin":
+
+        # Nobody signed in: send them home to log in first.
+        # A signed-in non-admin gets a clear refusal.
+
+        if not session.get("username"):
+            return redirect("/")
+
+        return (
+            "Administrator access only. Sign in with an administrator account.",
+            403,
+            {"Content-Type": "text/plain; charset=utf-8"},
+        )
+
+    return render_template("admin.html")
+
+
+@app.route("/api/admin/reports")
+def admin_reports():
+    denied = admin_only()
+
+    if denied:
+        return denied
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    counts = report_counts(connection)
+
+    rows = connection.execute(
+        """
+        SELECT id, name, issue, description, address, status, created_at
+        FROM reports
+        ORDER BY created_at DESC, id DESC
+        """
+    ).fetchall()
+
+    connection.close()
+
+    reports = [
+        {
+            "id": row[0],
+            "name": row[1],
+            "issue": row[2],
+            "description": row[3],
+            "address": row[4],
+            "status": row[5],
+            "created_at": row[6],
+        }
+        for row in rows
+    ]
+
+    return jsonify({"counts": counts, "reports": reports})
+
+
+@app.route("/api/admin/reports/<int:report_id>/status", methods=["POST"])
+def admin_set_status(report_id):
+    denied = admin_only()
+
+    if denied:
+        return denied
+
+    data = request.get_json(silent=True) or {}
+    status = str(data.get("status") or "").strip()
+
+    if status not in REPORT_STATUSES:
+        return jsonify({
+            "error": "Status must be Pending, In Progress or Resolved."
+        }), 400
+
+    connection = sqlite3.connect("eco_guardian.db")
+
+    cursor = connection.execute(
+        "UPDATE reports SET status = ? WHERE id = ?",
+        (status, report_id),
+    )
+
+    if cursor.rowcount == 0:
+        connection.close()
+
+        return jsonify({"error": "That report no longer exists."}), 404
+
+    connection.commit()
+
+    counts = report_counts(connection)
+
+    connection.close()
+
+    print("Report", report_id, "->", status)
+
+    return jsonify({
+        "ok": True,
+        "id": report_id,
+        "status": status,
+        "counts": counts,
+    })
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
