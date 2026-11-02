@@ -1,11 +1,12 @@
-import sqlite3
+from app import connect
 
-connection = sqlite3.connect("eco_guardian.db")
+connection = connect()
 
-# Column names, in table order.
-columns = [row[1] for row in connection.execute("PRAGMA table_info(reports)")]
+# Column names, in table order, then every record underneath.
+cursor = connection.execute("SELECT * FROM reports ORDER BY id")
+columns = [item[0] for item in cursor.description]
 
-records = connection.execute("SELECT * FROM reports").fetchall()
+records = cursor.fetchall()
 
 # Header row, a separator, then every record underneath it.
 print(" | ".join(columns))

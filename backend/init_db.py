@@ -1,24 +1,7 @@
-from flask import Flask, render_template, request
-import sqlite3
+# One-time schema setup for PostgreSQL. Importing app runs ensure_schema()
+# against DATABASE_URL, which creates every table if it is missing.
+from app import ensure_schema
 
-connection = sqlite3.connect("eco_guardian.db")
+ensure_schema()
 
-connection.execute("""
-    CREATE TABLE IF NOT EXISTS reports (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        issue TEXT NOT NULL,
-        description TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-""")
-
-connection.execute("""
-    ALTER TABLE reports
-    ADD COLUMN status TEXT NOT NULL DEFAULT 'Pending'
-""")
-
-connection.commit()
-connection.close()
-
-print("Reports table created successfully!")
+print("PostgreSQL schema is ready.")

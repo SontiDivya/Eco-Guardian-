@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .secret_key
 *.db
+*.backup-*
 *.sqlite3
 *.log
 *.zip
